@@ -1,0 +1,7 @@
+faster-whisper
+openai
+numpy
+sounddevice
+PyQt6
+Pillow
+gradio-client  # optionnel: pour generate_wavs.py
