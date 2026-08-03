@@ -1,0 +1,79 @@
+# Actions Système — Applications locales et terminaux
+actions:
+  - id: open_terminal
+    name: "Terminal"
+    category: "system"
+    triggers:
+      - terminal
+      - console
+      - cmd
+      - bash
+      - shell
+    command:
+      - qterminal
+      - sensible-terminal
+      - gnome-terminal
+      - kitty
+      - alacritty
+      - konsole
+      - xterm
+    gif_index: 2
+    wav: "action/terminal_open.wav"
+    response: "💻 Terminal ouvert ! C'est parti pour coder comme un boss ! 🚀"
+
+  - id: open_vscode
+    name: "VS Code"
+    category: "system"
+    triggers:
+      - vs code
+      - visual studio
+      - coder
+      - code
+    command:
+      - code
+    fallback_command:
+      - firefox
+      - https://vscode.dev
+    gif_index: 8
+    wav: "action/vscode_open.wav"
+    response: "💻 VS Code ouvert ! C'est parti pour coder ! 🚀"
+
+  - id: open_libreoffice
+    name: "Éditeur LibreOffice/Mousepad"
+    category: "system"
+    triggers:
+      - libreoffice
+      - writer
+      - document
+      - écrire
+      - lettre
+      - rédige
+      - word
+      - mousepad
+      - éditeur
+      - texte
+      - notepad
+    command:
+      - mousepad
+      - libreoffice
+      - soffice
+    command_args:
+      libreoffice: ["--writer"]
+      soffice: ["--writer"]
+    gif_index: 3
+    wav: "action/libreoffice_open.wav"
+    response: " Éditeur ouvert ! Prêt pour rédiger le prochain best-seller ? ✍️"
+
+  - id: open_discord
+    name: "Discord"
+    category: "system"
+    triggers:
+      - discord
+    command:
+      - discord
+    fallback_command:
+      - firefox
+      - https://discord.com/app
+    gif_index: 6
+    wav: "action/discord_open.wav"
+    response: "💬 Discord ouvert ! Prêt à rejoindre tes potes ? 🎮"

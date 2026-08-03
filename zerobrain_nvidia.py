@@ -12,6 +12,9 @@ from pathlib import Path
 from faster_whisper import WhisperModel
 from openai import OpenAI
 
+# Plugin system
+from plugins.loader import get_registry, ActionRegistry
+
 
 # ─── Config ───────────────────────────────────────────────────────────────
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -75,6 +78,10 @@ class ZeroChanBrain:
         except Exception as e:
             raise RuntimeError(f"❌ Erreur NVIDIA NIM : {e}")
 
+        # Plugin registry for actions
+        print("📦 Chargement des plugins d'actions...")
+        self.action_registry = get_registry(PROJECT_DIR / "actions")
+
     # ─── STT (inchangé) ──────────────────────────────────────────────────
     def transcribe(self, audio) -> str:
         segments, _ = self.whisper.transcribe(audio, language="fr")
@@ -121,65 +128,18 @@ class ZeroChanBrain:
                     return wav
         return None
 
+    # ─── Plugin-based Actions ──────────────────────────────────────────
     def detect_action(self, text: str) -> dict:
-        t = text.lower()
-        import re
-
-        if any(w in t for w in ["youtube", "vidéo", "clip", "regarder"]):
-            query = re.sub(r'youtube|vidéo|clip|regarder|cherche|lance|ouvre|sur|dans|pour|une|un', '', t).strip()
-            return {"name": "open_youtube", "arguments": {"query": query or "musique"}}
-
-        if any(w in t for w in ["terminal", "console", "cmd", "bash", "shell"]):
-            return {"name": "open_terminal", "arguments": {}}
-
-        if any(w in t for w in ["libreoffice", "writer", "document", "écrire", "lettre", "rédige", "word", "mousepad", "éditeur", "texte", "notepad"]):
-            return {"name": "open_libreoffice", "arguments": {"template": "blank"}}
-
-        if any(w in t for w in ["gmail", "mail", "email", "courriel"]):
-            return {"name": "open_gmail", "arguments": {"to": "", "subject": ""}}
-
-        if any(w in t for w in ["spotify", "écouter", "mets de la", "joue", "play", "musique"]):
-            genre = re.sub(r'spotify|écouter|mets de la|joue|play|musique|du|de la', '', t).strip()
-            artist = ""
-            for band in ["korn", "system of a down", "slipknot", "linkin park", "limp bizkit"]:
-                if band in genre:
-                    artist = band
-                    genre = genre.replace(band, "").strip()
-                    break
-            return {"name": "play_music", "arguments": {"genre": genre or "nu-metal", "artist": artist}}
-
-        if "discord" in t:
-            return {"name": "open_discord", "arguments": {}}
-
-        if any(w in t for w in ["navigateur", "chrome", "firefox", "surf", "web", "internet"]):
-            return {"name": "open_browser", "arguments": {}}
-
-        if any(w in t for w in ["vs code", "visual studio", "coder", "code"]):
-            return {"name": "open_vscode", "arguments": {}}
-
-        # ─── Nouvelles actions web / apps ────────────────────────────────
-        if any(w in t for w in ["kimi", "open_kimi"]):
-            return {"name": "open_kimi", "arguments": {}}
-
-        if any(w in t for w in ["zerocod", "zer0cod", "open_zerocod"]):
-            return {"name": "open_zerocod", "arguments": {}}
-
-        if any(w in t for w in ["github", "open_github"]):
-            return {"name": "open_github", "arguments": {}}
-
-        if any(w in t for w in ["huggingface", "hugging face", "open_huggingface"]):
-            return {"name": "open_huggingface", "arguments": {}}
-
-        if any(w in t for w in ["telegram", "open_telegram"]):
-            return {"name": "open_telegram", "arguments": {}}
-
-        if any(w in t for w in ["ouvre pi", "open_pi", "pi-cli", "pi cli"]):
-            return {"name": "open_pi_cli", "arguments": {}}
-
-        if any(w in t for w in ["ouvre qwen", "open_qwen", "qwen-cli", "qwen cli"]):
-            return {"name": "open_qwen_cli", "arguments": {}}
-
-        return {"name": "none", "arguments": {}}
+        """Détecte l'action via le registre de plugins"""
+        plugin = self.action_registry.find_action(text)
+        if plugin:
+            args = plugin.extract_args(text)
+            return {
+                "name": plugin.id,
+                "arguments": args,
+                "gif_index": plugin.gif_index
+            }
+        return {"name": "none", "arguments": {}, "gif_index": -1}
 
     def execute(self, action: dict) -> tuple:
         import webbrowser

@@ -1,0 +1,90 @@
+# Actions Web — Sites et services en ligne
+actions:
+  - id: open_youtube
+    name: "YouTube"
+    category: "web"
+    triggers:
+      - youtube
+      - vidéo
+      - clip
+      - regarder
+    url_template: "https://youtube.com/results?search_query={query}"
+    extract_query: true
+    query_cleanup: "youtube|vidéo|clip|regarder|cherche|lance|ouvre|sur|dans|pour|une|un"
+    gif_index: 1
+    wav: "action/youtube_open.wav"
+    fallback_wav: "action/youtube_search.wav"
+    response: "🎸 YouTube ouvert ! Prêt pour du Korn ? 🤘"
+    fallback_response: "🔍 Recherche YouTube : {query}"
+
+  - id: open_github
+    name: "GitHub"
+    category: "web"
+    triggers:
+      - github
+      - git hub
+    url: "https://github.com/"
+    gif_index: 7
+    wav: "action/browser_open.wav"
+    response: "🐙 GitHub ouvert ! Prêt à push ton code ? 🚀"
+
+  - id: open_huggingface
+    name: "Hugging Face"
+    category: "web"
+    triggers:
+      - huggingface
+      - hugging face
+    url: "https://huggingface.co/"
+    gif_index: 7
+    wav: "action/browser_open.wav"
+    response: "🤗 Hugging Face ouvert ! Modèles, datasets, spaces... enjoy ! 🧠"
+
+  - id: open_kimi
+    name: "Kimi AI"
+    category: "web"
+    triggers:
+      - kimi
+      - open_kimi
+    url: "https://www.kimi.com/en"
+    gif_index: 7
+    wav: "action/browser_open.wav"
+    response: "🤖 Kimi AI ouvert ! Prêt à discuter avec un LLM chinois ? 🇨🇳"
+
+  - id: open_telegram
+    name: "Telegram Web"
+    category: "web"
+    triggers:
+      - telegram
+      - open_telegram
+    url: "https://web.telegram.org/k/"
+    gif_index: 7
+    wav: "action/browser_open.wav"
+    response: "✈️ Telegram Web ouvert ! Tes messages t'attendent ! 💬"
+
+  - id: open_gmail
+    name: "Gmail"
+    category: "web"
+    triggers:
+      - gmail
+      - mail
+      - email
+      - courriel
+    url: "https://mail.google.com/mail/u/0/#compose"
+    gif_index: 4
+    wav: "action/gmail_open.wav"
+    response: "📧 Gmail est ouvert ! Qui veux-tu contacter ? 👀"
+
+  - id: open_browser
+    name: "Navigateur"
+    category: "web"
+    triggers:
+      - navigateur
+      - chrome
+      - firefox
+      - surf
+      - web
+      - internet
+    url: "https://google.com"
+    gif_index: 7
+    wav: "action/browser_open.wav"
+    response: " Navigateur ouvert ! Internet est à toi ! "

@@ -1,0 +1,35 @@
+# Actions Musique — YouTube Music avec détection d'artiste
+actions:
+  - id: play_music
+    name: "Musique YouTube Music"
+    category: "music"
+    triggers:
+      - spotify
+      - écouter
+      - mets de la
+      - joue
+      - play
+      - musique
+    url_template: "https://music.youtube.com/search?q={query}"
+    extract_query: true
+    query_cleanup: "spotify|écouter|mets de la|joue|play|musique|du|de la"
+    gif_index: 5
+    wav: "action/spotify_open.wav"
+    response: "🎸 Musique lancée ! Ça va secouer ! 🔊"
+    # Artistes spéciaux avec réponse custom
+    artists:
+      - name: "Korn"
+        triggers: ["korn"]
+        response: "🤘 KORN MODE ACTIVÉ ! C'est parti pour le mosh pit ! 🔥"
+      - name: "System of a Down"
+        triggers: ["system of a down", "soad"]
+        response: "🤘 System of a Down ! Les frères Tankian débarquent ! 🔥"
+      - name: "Slipknot"
+        triggers: ["slipknot"]
+        response: "🤘 Slipknot ! Corey Taylor est en forme ! 🔥"
+      - name: "Linkin Park"
+        triggers: ["linkin park"]
+        response: "🤘 Linkin Park ! Chester et Mike te font un coucou ! 🔥"
+      - name: "Limp Bizkit"
+        triggers: ["limp bizkit"]
+        response: "🤘 Limp Bizkit ! Fred Durst est dans la place ! 🔥"

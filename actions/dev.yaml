@@ -1,0 +1,66 @@
+# Actions Développement — Outils CLI et IDEs spécialisés
+actions:
+  - id: open_pi_cli
+    name: "pi-cli"
+    category: "dev"
+    triggers:
+      - "ouvre pi"
+      - open_pi
+      - pi-cli
+      - pi cli
+    command_template: "{terminal} -e pi"
+    terminals:
+      - qterminal
+      - sensible-terminal
+      - gnome-terminal
+      - kitty
+      - alacritty
+      - konsole
+      - xterm
+    gif_index: 9
+    wav: "action/terminal_open.wav"
+    response: "🤖 pi-cli lancé dans le terminal ! Code away ! 💻"
+
+  - id: open_qwen_cli
+    name: "qwen-cli"
+    category: "dev"
+    triggers:
+      - "ouvre qwen"
+      - open_qwen
+      - qwen-cli
+      - qwen cli
+    command_template: "{terminal} -e qwen"
+    terminals:
+      - qterminal
+      - sensible-terminal
+      - gnome-terminal
+      - kitty
+      - alacritty
+      - konsole
+      - xterm
+    gif_index: 10
+    wav: "action/terminal_open.wav"
+    response: "🧠 qwen-cli lancé dans le terminal ! Prêt à coder ! 💻"
+
+  - id: open_zerocod
+    name: "Zer0Cod"
+    category: "dev"
+    triggers:
+      - zerocod
+      - zer0cod
+      - open_zerocod
+    desktop_name: "Zer0Cod"
+    desktop_paths:
+      - "~/.local/share/applications/Zer0Cod.desktop"
+      - "~/Desktop/Zer0Cod.desktop"
+      - "/usr/share/applications/Zer0Cod.desktop"
+    fallback_command:
+      - code
+    fallback_command_web:
+      - firefox
+      - https://vscode.dev
+    gif_index: 8
+    wav: "action/browser_open.wav"
+    fallback_wav: "action/vscode_open.wav"
+    response: "💻 Zer0Cod lancé ! C'est parti pour coder ! 🚀"
+    fallback_response: "💻 Zer0Cod introuvable, VS Code ouvert à la place ! 🚀"

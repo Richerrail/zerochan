@@ -134,7 +134,14 @@ Double-clic sur **`Zero-chan.desktop`** sur le Bureau.
 
 ```
 zerochan.py           # App principale (PyQt6, hotkey, pipeline audio, GIFs)
-zerobrain_nvidia.py   # Cerveau : Whisper (STT) + NVIDIA Nemotron (LLM) + Actions/Émotions/GIF mapping
+zerobrain_nvidia.py   # Cerveau : Whisper (STT) + NVIDIA Nemotron (LLM) + Plugin Registry
+actions/              # Plugins d'actions (YAML)
+│   ├── web.yaml      # YouTube, GitHub, HuggingFace, Kimi, Telegram, Gmail, Navigateur
+│   ├── system.yaml   # Terminal, VS Code, LibreOffice, Discord
+│   ├── dev.yaml      # pi-cli, qwen-cli, Zer0Cod
+│   └── music.yaml    # YouTube Music + détection artistes
+plugins/
+│   └── loader.py     # Chargeur de plugins (ActionRegistry, ActionPlugin)
 audio_zerochan/       # WAV TTS organisés par catégorie
 image*.gif            # 12 Avatars animés (image.gif à image11.gif)
 venv/                 # Environnement Python isolé
@@ -188,26 +195,50 @@ f'"/usr/bin/touch {trigger_path}"',
 "    Ctrl+Shift+Z",   # ← Change ici (ex: Ctrl+Alt+Z)
 ```
 
-### Mapping Action → GIF (dans `zerobrain_nvidia.py`)
-```python
-GIF_MAP = {
-    "open_youtube": 1,        # image1.gif
-    "open_terminal": 2,       # image2.gif
-    "open_libreoffice": 3,    # image3.gif
-    "open_gmail": 4,          # image4.gif
-    "play_music": 5,          # image5.gif
-    "open_discord": 6,        # image6.gif
-    "open_browser": 7,        # image7.gif
-    "open_vscode": 8,         # image8.gif
-    "open_kimi": 7,
-    "open_zerocod": 8,
-    "open_github": 7,
-    "open_huggingface": 7,
-    "open_telegram": 7,
-    "open_pi_cli": 9,         # image9.gif
-    "open_qwen_cli": 10,      # image10.gif
-}
+## ⚙️ Configuration
+
+### Plugins d'actions (YAML) — **Nouveau : Système de plugins**
+
+Les actions sont maintenant définies dans des fichiers YAML dans le dossier `actions/` :
+
 ```
+actions/
+├── web.yaml      # YouTube, GitHub, HuggingFace, Kimi, Telegram, Gmail, Navigateur
+├── system.yaml   # Terminal, VS Code, LibreOffice, Discord
+├── dev.yaml      # pi-cli, qwen-cli, Zer0Cod
+└── music.yaml    # YouTube Music avec détection d'artistes
+```
+
+**Ajouter une action sans toucher au code :**
+
+1. Crée/modifie un fichier dans `actions/` (ex: `actions/custom.yaml`)
+2. Ajoute ton action :
+```yaml
+# actions/custom.yaml
+actions:
+  - id: open_reddit
+    name: "Reddit"
+    category: "web"
+    triggers:
+      - reddit
+      - r/
+    url: "https://reddit.com/"
+    gif_index: 7
+    wav: "action/browser_open.wav"
+    response: "📱 Reddit ouvert ! Quelle subreddit ? 🤔"
+```
+3. **Redémarre Zero-chan** → `"ouvre reddit"` fonctionne direct !
+
+**Types d'actions supportés :**
+| Type | category | Utilisation |
+|------|----------|-------------|
+| `web` | web | Ouvre URL (`webbrowser.open`)
+| `music` | music | YouTube Music + détection artistes
+| `system` | system | Lance commande locale (`subprocess`)
+| `terminal` | dev | Lance dans terminal (`{terminal} -e cmd`)
+| `desktop` | dev | Lance `.desktop` (`gtk-launch`)
+
+**Champs disponibles :** `triggers`, `url`/`url_template`, `command`/`command_template`, `terminals`, `fallback_command`, `desktop_name`, `desktop_paths`, `gif_index`, `wav`, `fallback_wav`, `response`, `fallback_response`, `artists` (music), `priority` (ordre de priorité).
 
 ---
 
@@ -260,10 +291,10 @@ Pillow
 - [ ] Support multi-langues (Whisper `language=None` auto-détect)
 - [ ] Streaming LLM (tokens progressifs dans la bulle)
 - [ ] TTS local (piper, kokoro, bark) pour zéro cloud
-- [ ] Plugins d'actions (YAML/JSON) sans modifier le code
 - [ ] Mode "always listening" avec VAD (Silero)
 - [ ] OverlayWayland (wlr-layer-shell) pour Hyprland/Sway
 - [ ] GIFs spécifiques pour émotions (love, angry, sad, etc.)
+- [ ] Hot-reload des plugins YAML sans redémarrer (QFileSystemWatcher)
 
 ---
 
