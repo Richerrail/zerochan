@@ -116,14 +116,21 @@ class AvatarWidget(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(4)
 
-        # GIF animé (scaled pour tenir dans 200x200)
-        self.movie = QMovie(str(IMAGE_GIF))
+        # GIFs animés (alterne entre plusieurs)
+        self.gif_files = sorted(PROJECT_DIR.glob("image*.gif"), key=lambda p: int(p.stem.replace('image', '') or '0'))
+        self.current_gif_index = 0
+        self.movie = QMovie(str(self.gif_files[self.current_gif_index]))
         self.avatar_label = QLabel()
         self.avatar_label.setMovie(self.movie)
         self.avatar_label.setFixedSize(200, 200)
         self.avatar_label.setScaledContents(True)
         self.avatar_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.movie.start()
+
+        # Timer pour alterner les GIFs toutes les 3 secondes
+        self.gif_timer = QTimer()
+        self.gif_timer.timeout.connect(self._switch_gif)
+        self.gif_timer.start(3000)  # 3 secondes
 
         # Bulle de dialogue
         self.bubble = QLabel("Konnichiwa ! ")
@@ -144,6 +151,10 @@ class AvatarWidget(QWidget):
         )
         self.bubble.setWordWrap(True)
         self.bubble.setFixedWidth(270)
+
+        # Raccourci clavier : Échap pour fermer
+        self.close_shortcut = QShortcut(QKeySequence(Qt.Key.Key_Escape), self)
+        self.close_shortcut.activated.connect(self.close)
 
         # Visualiseur audio
         self.visualizer = QLabel("∿∿∿")
@@ -210,9 +221,30 @@ class AvatarWidget(QWidget):
         )
         self.mic_btn.clicked.connect(self.mic_clicked.emit)
 
+        # Bouton fermer
+        self.close_btn = QPushButton("✕")
+        self.close_btn.setFixedSize(36, 36)
+        self.close_btn.setStyleSheet(
+            """
+            QPushButton {
+                background-color: #E74C3C;
+                border: none;
+                border-radius: 18px;
+                font-size: 18px;
+                font-weight: bold;
+                color: white;
+            }
+            QPushButton:hover {
+                background-color: #C0392B;
+            }
+            """
+        )
+        self.close_btn.clicked.connect(self.close)
+
         chat_bar.addWidget(self.chat_input)
         chat_bar.addWidget(self.mic_btn)
         chat_bar.addWidget(self.chat_btn)
+        chat_bar.addWidget(self.close_btn)
 
         layout.addWidget(self.bubble, alignment=Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.avatar_label, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -235,6 +267,42 @@ class AvatarWidget(QWidget):
         import random
         bars = "".join(["▂" if random.random() > 0.5 else "▄" for _ in range(10)])
         self.visualizer.setText(bars)
+
+    def _switch_gif(self):
+        """Passe au GIF suivant dans la liste"""
+        if not self.gif_files:
+            return
+        self.current_gif_index = (self.current_gif_index + 1) % len(self.gif_files)
+        next_gif = self.gif_files[self.current_gif_index]
+        self.movie.stop()
+        self.movie = QMovie(str(next_gif))
+        self.avatar_label.setMovie(self.movie)
+        self.movie.start()
+
+    def play_specific_gif(self, gif_index: int):
+        """Joue un GIF spécifique (arrête la rotation auto)"""
+        if not self.gif_files or gif_index < 0 or gif_index >= len(self.gif_files):
+            return
+        self.gif_timer.stop()  # Arrête la rotation auto
+        self.current_gif_index = gif_index
+        next_gif = self.gif_files[gif_index]
+        self.movie.stop()
+        self.movie = QMovie(str(next_gif))
+        self.avatar_label.setMovie(self.movie)
+        self.movie.start()
+
+    def resume_random_gif(self):
+        """Reprend la rotation aléatoire des GIFs"""
+        if not self.gif_files:
+            return
+        import random
+        self.current_gif_index = random.randint(0, len(self.gif_files) - 1)
+        next_gif = self.gif_files[self.current_gif_index]
+        self.movie.stop()
+        self.movie = QMovie(str(next_gif))
+        self.avatar_label.setMovie(self.movie)
+        self.movie.start()
+        self.gif_timer.start(3000)
 
     def say(self, text: str):
         self.bubble.setText(text)
@@ -382,7 +450,7 @@ class ZeroChanApp(QObject):
         print(f" Zero-chan dit : {personality_reply}")
 
         # 3) Exécuter l'action
-        wav_path, action_msg = self.brain.execute(action)
+        wav_path, action_msg, action_gif = self.brain.execute(action)
 
         # 4) Afficher + jouer
         if action_msg:
@@ -391,6 +459,13 @@ class ZeroChanApp(QObject):
             combined = personality_reply
 
         self.avatar.say(combined)
+
+        # Jouer le GIF spécifique à l'action si défini
+        if action_gif >= 0:
+            self.avatar.play_specific_gif(action_gif)
+        else:
+            # Reprendre l'aléatoire après 5s
+            QTimer.singleShot(5000, self.avatar.resume_random_gif)
 
         # Jouer le wav de l'action si dispo
         if wav_path and wav_path.exists():
