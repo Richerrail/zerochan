@@ -268,3 +268,13 @@ Pillow
 ---
 
 **Fait avec ❤️ pour les fans d'anime & de metal** 🤘🎸
+
+---
+
+## Soutenez le projet
+
+<p align="center">
+  <a href="https://www.buymeacoffee.com/richerrailk" target="_blank" rel="noopener noreferrer">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee">
+  </a>
+</p>
