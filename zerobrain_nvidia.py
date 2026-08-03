@@ -157,6 +157,28 @@ class ZeroChanBrain:
         if any(w in t for w in ["vs code", "visual studio", "coder", "code"]):
             return {"name": "open_vscode", "arguments": {}}
 
+        # ─── Nouvelles actions web / apps ────────────────────────────────
+        if any(w in t for w in ["kimi", "open_kimi"]):
+            return {"name": "open_kimi", "arguments": {}}
+
+        if any(w in t for w in ["zerocod", "zer0cod", "open_zerocod"]):
+            return {"name": "open_zerocod", "arguments": {}}
+
+        if any(w in t for w in ["github", "open_github"]):
+            return {"name": "open_github", "arguments": {}}
+
+        if any(w in t for w in ["huggingface", "hugging face", "open_huggingface"]):
+            return {"name": "open_huggingface", "arguments": {}}
+
+        if any(w in t for w in ["telegram", "open_telegram"]):
+            return {"name": "open_telegram", "arguments": {}}
+
+        if any(w in t for w in ["ouvre pi", "open_pi", "pi-cli", "pi cli"]):
+            return {"name": "open_pi_cli", "arguments": {}}
+
+        if any(w in t for w in ["ouvre qwen", "open_qwen", "qwen-cli", "qwen cli"]):
+            return {"name": "open_qwen_cli", "arguments": {}}
+
         return {"name": "none", "arguments": {}}
 
     def execute(self, action: dict) -> tuple:
@@ -169,21 +191,42 @@ class ZeroChanBrain:
         ACTION_DIR = AUDIO_BASE / "action"
         ERRORS_DIR = AUDIO_BASE / "errors"
 
+        # Mapping action -> gif_index
+        GIF_MAP = {
+            "open_youtube": 1,
+            "open_terminal": 2,
+            "open_libreoffice": 3,
+            "open_gmail": 4,
+            "play_music": 5,
+            "open_discord": 6,
+            "open_browser": 7,
+            "open_vscode": 8,
+            "open_kimi": 7,
+            "open_zerocod": 8,
+            "open_github": 7,
+            "open_huggingface": 7,
+            "open_telegram": 7,
+            "open_pi_cli": 9,
+            "open_qwen_cli": 10,
+        }
+
+        gif_idx = GIF_MAP.get(name, -1)
+
         if name == "open_youtube":
             query = args.get("query", "musique")
             url = f"https://youtube.com/results?search_query={query.replace(' ', '+')}"
             webbrowser.open(url)
             wav = ACTION_DIR / "youtube_open.wav" if query == "musique" else ACTION_DIR / "youtube_search.wav"
-            return wav, f"🎸 YouTube ouvert ! Prêt pour du Korn ? Ou tu veux autre chose ? 🤘"
+            return wav, f"🎸 YouTube ouvert ! Prêt pour du Korn ? Ou tu veux autre chose ? 🤘", gif_idx
 
         elif name == "open_terminal":
             for term in ["qterminal", "sensible-terminal", "gnome-terminal", "kitty", "alacritty", "konsole", "xterm"]:
                 try:
                     subprocess.Popen([term])
-                    return ACTION_DIR / "terminal_open.wav", "💻 Terminal ouvert ! C'est parti pour coder comme un boss ! 🚀"
+                    return ACTION_DIR / "terminal_open.wav", "💻 Terminal ouvert ! C'est parti pour coder comme un boss ! 🚀", gif_idx
                 except FileNotFoundError:
                     continue
-            return ERRORS_DIR / "not_found.wav", " Je n'ai pas trouvé de terminal..."
+            return ERRORS_DIR / "not_found.wav", " Je n'ai pas trouvé de terminal...", -1
 
         elif name == "open_libreoffice":
             for app in ["mousepad", "libreoffice", "soffice"]:
@@ -192,14 +235,14 @@ class ZeroChanBrain:
                         subprocess.Popen([app, "--writer"])
                     else:
                         subprocess.Popen([app])
-                    return ACTION_DIR / "libreoffice_open.wav", " Éditeur ouvert ! Prêt pour rédiger le prochain best-seller ? ✍️"
+                    return ACTION_DIR / "libreoffice_open.wav", " Éditeur ouvert ! Prêt pour rédiger le prochain best-seller ? ✍️", gif_idx
                 except FileNotFoundError:
                     continue
-            return ERRORS_DIR / "not_found.wav", " Je n'ai pas trouvé d'éditeur de texte..."
+            return ERRORS_DIR / "not_found.wav", " Je n'ai pas trouvé d'éditeur de texte...", -1
 
         elif name == "open_gmail":
             webbrowser.open("https://mail.google.com/mail/u/0/#compose")
-            return ACTION_DIR / "gmail_open.wav", "📧 Gmail est ouvert ! Qui veux-tu contacter ? 👀"
+            return ACTION_DIR / "gmail_open.wav", "📧 Gmail est ouvert ! Qui veux-tu contacter ? 👀", gif_idx
 
         elif name == "play_music":
             genre = args.get("genre", "nu-metal")
@@ -207,35 +250,82 @@ class ZeroChanBrain:
             search = f"{artist} {genre}".strip()
             webbrowser.open(f"https://music.youtube.com/search?q={search.replace(' ', '+')}")
             if artist:
-                return ACTION_DIR / "spotify_open.wav", f"🤘 {artist.upper()} MODE ACTIVÉ ! C'est parti pour le mosh pit ! 🔥"
-            return ACTION_DIR / "spotify_open.wav", f"🎸 Musique lancée ! Ça va secouer ! 🔊"
+                return ACTION_DIR / "spotify_open.wav", f"🤘 {artist.upper()} MODE ACTIVÉ ! C'est parti pour le mosh pit ! 🔥", gif_idx
+            return ACTION_DIR / "spotify_open.wav", f"🎸 Musique lancée ! Ça va secouer ! 🔊", gif_idx
 
         elif name == "open_discord":
-            for app in ["discord", "chromium", "firefox"]:
+            for app in ["discord", "firefox"]:
                 try:
-                    if app in ["chromium", "firefox"]:
-                        subprocess.Popen([app, "https://discord.com/app"])
-                    else:
-                        subprocess.Popen([app])
-                    return ACTION_DIR / "discord_open.wav", "💬 Discord ouvert ! Prêt à rejoindre tes potes ? 🎮"
+                    subprocess.Popen([app, "https://discord.com/app"])
+                    return ACTION_DIR / "discord_open.wav", "💬 Discord ouvert ! Prêt à rejoindre tes potes ? 🎮", gif_idx
                 except FileNotFoundError:
                     continue
-            return ERRORS_DIR / "not_found.wav", " Je n'ai pas trouvé Discord..."
+            return ERRORS_DIR / "not_found.wav", " Je n'ai pas trouvé Discord...", -1
 
         elif name == "open_browser":
             webbrowser.open("https://google.com")
-            return ACTION_DIR / "browser_open.wav", " Navigateur ouvert ! Internet est à toi ! "
+            return ACTION_DIR / "browser_open.wav", " Navigateur ouvert ! Internet est à toi ! ", gif_idx
 
         elif name == "open_vscode":
-            for app in ["code", "chromium", "firefox"]:
+            for app in ["code", "firefox"]:
                 try:
-                    if app in ["chromium", "firefox"]:
-                        subprocess.Popen([app, "https://vscode.dev"])
-                    else:
-                        subprocess.Popen([app])
-                    return ACTION_DIR / "vscode_open.wav", "💻 VS Code ouvert ! C'est parti pour coder ! 🚀"
+                    subprocess.Popen([app, "https://vscode.dev"])
+                    return ACTION_DIR / "vscode_open.wav", "💻 VS Code ouvert ! C'est parti pour coder ! 🚀", gif_idx
                 except FileNotFoundError:
                     continue
-            return ERRORS_DIR / "not_found.wav", " Je n'ai pas trouvé VS Code..."
+            return ERRORS_DIR / "not_found.wav", " Je n'ai pas trouvé VS Code...", -1
 
-        return None, None
+        # ─── Nouvelles actions web / apps ────────────────────────────────
+        elif name == "open_kimi":
+            webbrowser.open("https://www.kimi.com/en")
+            return ACTION_DIR / "browser_open.wav", "🤖 Kimi AI ouvert ! Prêt à discuter avec un LLM chinois ? 🇨🇳", gif_idx
+
+        elif name == "open_zerocod":
+            desktop_path = Path.home() / ".local/share/applications/Zer0Cod.desktop"
+            if not desktop_path.exists():
+                desktop_path = Path.home() / "Desktop/Zer0Cod.desktop"
+            if not desktop_path.exists():
+                desktop_path = Path("/usr/share/applications/Zer0Cod.desktop")
+            if desktop_path.exists():
+                subprocess.Popen(["gtk-launch", "Zer0Cod"])
+                return ACTION_DIR / "browser_open.wav", "💻 Zer0Cod lancé ! C'est parti pour coder ! 🚀", gif_idx
+            else:
+                for app in ["code", "firefox"]:
+                    try:
+                        subprocess.Popen([app, "https://vscode.dev"])
+                        return ACTION_DIR / "vscode_open.wav", "💻 Zer0Cod introuvable, VS Code ouvert à la place ! 🚀", gif_idx
+                    except FileNotFoundError:
+                        continue
+                return ERRORS_DIR / "not_found.wav", " Zer0Cod introuvable et pas de fallback...", -1
+
+        elif name == "open_github":
+            webbrowser.open("https://github.com/")
+            return ACTION_DIR / "browser_open.wav", "🐙 GitHub ouvert ! Prêt à push ton code ? 🚀", gif_idx
+
+        elif name == "open_huggingface":
+            webbrowser.open("https://huggingface.co/")
+            return ACTION_DIR / "browser_open.wav", "🤗 Hugging Face ouvert ! Modèles, datasets, spaces... enjoy ! 🧠", gif_idx
+
+        elif name == "open_telegram":
+            webbrowser.open("https://web.telegram.org/k/")
+            return ACTION_DIR / "browser_open.wav", "✈️ Telegram Web ouvert ! Tes messages t'attendent ! 💬", gif_idx
+
+        elif name == "open_pi_cli":
+            for term in ["qterminal", "sensible-terminal", "gnome-terminal", "kitty", "alacritty", "konsole", "xterm"]:
+                try:
+                    subprocess.Popen([term, "-e", "pi"])
+                    return ACTION_DIR / "terminal_open.wav", "🤖 pi-cli lancé dans le terminal ! Code away ! 💻", gif_idx
+                except FileNotFoundError:
+                    continue
+            return ERRORS_DIR / "not_found.wav", " Aucun terminal trouvé pour pi-cli...", -1
+
+        elif name == "open_qwen_cli":
+            for term in ["qterminal", "sensible-terminal", "gnome-terminal", "kitty", "alacritty", "konsole", "xterm"]:
+                try:
+                    subprocess.Popen([term, "-e", "qwen"])
+                    return ACTION_DIR / "terminal_open.wav", "🧠 qwen-cli lancé dans le terminal ! Prêt à coder ! 💻", gif_idx
+                except FileNotFoundError:
+                    continue
+            return ERRORS_DIR / "not_found.wav", " Aucun terminal trouvé pour qwen-cli...", -1
+
+        return None, None, -1
